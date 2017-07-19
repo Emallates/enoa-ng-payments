@@ -1,6 +1,6 @@
 {
   "name": "enoa-ng-payments",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./dist/payments.js",
   "directories": {
