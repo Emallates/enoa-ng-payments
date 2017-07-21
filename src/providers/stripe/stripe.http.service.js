@@ -13,7 +13,7 @@ class httpService {
       ? `${configs.base_url}${options.url}`
       : options.url;
     options.data = this.$httpParamSerializerJQLike(options.data);
-    options.headers = angular.extend({ 'Content-Type': 'application/x-www-form-urlencoded' }, options.headers);
+    options.headers = angular.extend({ 'Content-Type': 'application/x-www-form-urlencoded' }, options.headers, { auth: false });
     return (typeof callback !== 'function')
     ? this.$http(options)
     : this.$http(options)
@@ -22,6 +22,7 @@ class httpService {
   }
 }
 
-httpService.$injector = ['$http', '$httpParamSerializerJQLike', 'stripeConfig'];
+httpService.$inject = ['$http', '$httpParamSerializerJQLike', 'stripeConfig'];
+// httpService.$injector = ['$http', '$httpParamSerializerJQLike', 'stripeConfig'];
 
-export { httpService as default }
+export default httpService;

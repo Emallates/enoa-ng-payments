@@ -7,7 +7,9 @@ angular.module('app', ['ng-payments'])
 .config(['stripeConfigProvider',function(stripeConfigProvider) {
   stripeConfigProvider.set({ apiKey: "pk_test_JXSZmnQt9e9mEdU8JKFJBs5S" })
 }])
-.controller('ctrl', ['$scope', /*'stripeSource',*/ function($scope/*, stripeSource*/){
+.controller('ctrl', ['$scope', 'stripeSource', function($scope, stripeSource){
+
+  // console.log('stripeSource ->', stripeSource.authSource);
   
   $scope.pMethod = {
     card: {

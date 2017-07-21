@@ -1,5 +1,7 @@
 import addCard from "./add-card"
+const defMap = { addCard };
 
 export {
-  addCard
+  addCard,
+  defMap as default
 }
