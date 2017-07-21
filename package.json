@@ -22,7 +22,6 @@
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
     "bower-webpack-plugin": "^0.1.9",
-    "glob": "^7.1.2",
     "webpack": "^3.3.0",
     "webpack-dev-server": "^2.5.1"
   },
@@ -33,6 +32,6 @@
     "server": "webpack-dev-server --history-api-fallback --inline --progress",
     "start": "cls & npm run server"
   },
-  "author": "",
+  "author": "Nauman Ramzan (nomi_ramzan@yahoo.com)",
   "license": "MIT"
 }
