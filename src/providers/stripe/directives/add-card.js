@@ -25,5 +25,4 @@ class addCard {
   }
 }
 addCard.Factory.$inject = ['stripeSource'];
-// addCard.$inject = [];
-export { addCard as default }
+export default addCard;

@@ -174,9 +174,10 @@ var httpService = function () {
       var configs = this.stripeConfig;
       if (options.data) options.data.key = configs.key;
 
+      options.auth = false;
       options.url = options.url.indexOf(configs.base_url) === -1 ? '' + configs.base_url + options.url : options.url;
       options.data = this.$httpParamSerializerJQLike(options.data);
-      options.headers = angular.extend({ 'Content-Type': 'application/x-www-form-urlencoded' }, options.headers);
+      options.headers = angular.extend({ 'Content-Type': 'application/x-www-form-urlencoded' }, options.headers, { auth: false });
       return typeof callback !== 'function' ? this.$http(options) : this.$http(options).then(function (R) {
         return callback(R.status, R.data);
       }).catch(function (ERR) {
@@ -342,8 +343,8 @@ var stripeSource = function () {
         }
         var tElm = requestObject.targetElement;
         if (!tElm) {
-          tElm = angular.element('<div>')[0];
-          var v = angular.element('body')[0].append(tElm);
+          tElm = angular.element('<div></div>')[0];
+          angular.element('body').append(tElm);
         }
         tElm.innerHTML = '<iframe style="width:100%; height: 300px;" frameborder="0" src="' + stripe3dsResponse.redirect.url + '"></iframe>';
         requestObject.nativeElement = tElm;
@@ -422,7 +423,7 @@ exports.default = angular.module('stripe.directives', []).directive('createSourc
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.addCard = undefined;
+exports.default = exports.addCard = undefined;
 
 var _addCard = __webpack_require__(6);
 
@@ -430,7 +431,10 @@ var _addCard2 = _interopRequireDefault(_addCard);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var defMap = { addCard: _addCard2.default };
+
 exports.addCard = _addCard2.default;
+exports.default = defMap;
 
 /***/ }),
 /* 6 */
@@ -488,7 +492,6 @@ var addCard = function () {
 }();
 
 addCard.Factory.$inject = ['stripeSource'];
-// addCard.$inject = [];
 exports.default = addCard;
 
 /***/ }),

@@ -9,11 +9,12 @@ class httpService {
     const configs = this.stripeConfig;
     if (options.data) options.data.key = configs.key;
 
+    options.auth = false;
     options.url = (options.url.indexOf(configs.base_url) === -1)
       ? `${configs.base_url}${options.url}`
       : options.url;
     options.data = this.$httpParamSerializerJQLike(options.data);
-    options.headers = angular.extend({ 'Content-Type': 'application/x-www-form-urlencoded' }, options.headers);
+    options.headers = angular.extend({ 'Content-Type': 'application/x-www-form-urlencoded' }, options.headers, { auth: false });
     return (typeof callback !== 'function')
     ? this.$http(options)
     : this.$http(options)
