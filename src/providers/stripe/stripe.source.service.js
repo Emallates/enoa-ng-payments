@@ -116,7 +116,7 @@ class stripeSource {
         tElm = angular.element('<div></div>')[0]
         angular.element('body').append(tElm)
       }
-      tElm.innerHTML = `<iframe style="width:100%; height: 800px;" frameborder="0" src="${stripe3dsResponse.redirect.url}"></iframe>`;
+      tElm.innerHTML = `<iframe style="width:100%; height: 300px;" frameborder="0" src="${stripe3dsResponse.redirect.url}"></iframe>`;
       requestObject.nativeElement = tElm;
       const poolingCallback = this.poolCallback(requestObject, success, fail);
       return this.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret, fail);

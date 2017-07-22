@@ -9,7 +9,6 @@ angular.module('app', ['ng-payments'])
 }])
 .controller('ctrl', ['$scope', 'stripeSource', function($scope, stripeSource){
 
-  console.log(stripeSource);
   
   $scope.pMethod = {
     card: {
@@ -38,9 +37,12 @@ angular.module('app', ['ng-payments'])
     $scope.onSuccess = R => console.log(R);
     $scope.onFail = Err => console.log(Err);
 
-    // stripeSource.createCard($scope.pMethod)
-    //   .then(
-    //     R => console.log('Final', R),
-    //     err => console.log('Final error', err)
-    //   );
+    $scope.save = function () {
+      stripeSource.createCard($scope.pMethod)
+        .then(
+          R => console.log('Final', R),
+          err => console.log('Final error', err)
+        );
+    }
+
 }])
