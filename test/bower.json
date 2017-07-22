@@ -1,0 +1,22 @@
+{
+  "name": "draft",
+  "description": "",
+  "main": "server.js",
+  "authors": [
+    "Nauman Ramzan <nomi_ramzan@yahoo.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/Emallates/enoa-ng-payments",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-ui-router": "0.3.1",
+    "angular": "1.5",
+    "enoa-ng-payments": "*"
+  }
+}

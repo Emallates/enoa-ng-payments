@@ -22,6 +22,6 @@ class httpService {
   }
 }
 
-httpService.$injector = ['$http', '$httpParamSerializerJQLike', 'stripeConfig'];
+httpService.$inject = ['$http', '$httpParamSerializerJQLike', 'stripeConfig'];
 
-export { httpService as default }
+export default httpService;

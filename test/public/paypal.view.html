@@ -1,0 +1,30 @@
+<form role="form">
+<legend>Pay with <strong>Paypal</strong></legend>
+  
+  <div class="form-group">
+    <label for="payment-custome">Custome</label>
+    <input type="checkbox" class="form-control" id="payment-custome" ng-model="payment.custome">
+  </div>
+
+  <div class="form-group" ng-if="payment.custome">
+    <label for="payment-amount">Amount</label>
+    <input type="test" class="form-control" id="payment-amount" ng-model="payment.amount">
+  </div>
+
+  <div class="form-group" ng-if="!payment.custome">
+    <label for="payment-amount">Amount</label>
+    <select name="payment-amount" id="inputPayment-Amount" class="form-control" ng-model="payment.amount" required="required">
+      <option value="100">100 USD</option>
+      <option value="200">200 USD</option>
+      <option value="300">300 USD</option>
+      <option value="400">400 USD</option>
+      <option value="500">500 USD</option>
+      <option value="600">600 USD</option>
+      <option value="700">700 USD</option>
+    </select>
+  </div>
+
+  <div id="iframe"></div>
+
+  <button class="btn btn-primary" ng-click="pay()">Pay</button>
+</form>

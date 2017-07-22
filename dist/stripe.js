@@ -98,7 +98,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 * Stripe service provider
 */
 exports.default = angular.module('stripe', ['stripe.directives']).provider('stripeConfig', _stripeProvider2.default).service('httpService', _stripeHttpService2.default).service('stripeSource', _stripeSourceService2.default);
-// ;
 
 /***/ }),
 /* 1 */
@@ -189,7 +188,7 @@ var httpService = function () {
   return httpService;
 }();
 
-httpService.$injector = ['$http', '$httpParamSerializerJQLike', 'stripeConfig'];
+httpService.$inject = ['$http', '$httpParamSerializerJQLike', 'stripeConfig'];
 
 exports.default = httpService;
 
@@ -203,102 +202,123 @@ exports.default = httpService;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /**
 * stripe.source Module
 *
 * Deal with stripe sources
 * @see [description]
 */
-stripeSource.$injector = ['httpService', 'stripeConfig', '$q'];
 
-function stripeSource(httpService, stripeConfig, $q) {
-  var extend = angular.extend;
-  var forEach = angular.forEach;
-  var hopArr = function hopArr(arr, key) {
-    return arr.indexOf(key) > -1;
-  };
-  return {
-    createCard: createCard
-  };
+var extend = angular.extend;
+var forEach = angular.forEach;
+var hopArr = function hopArr(arr, key) {
+  return arr.indexOf(key) > -1;
+};
 
-  function createCard(requestObject) {
-    var newCard = {
-      type: 'card'
-    };
-    forEach(requestObject.card, function (val, key) {
-      if (hopArr[('number', 'cvc', 'exp_month', 'exp_year')], key) {
-        newCard['card[' + key + ']'] = val;
-      }
-    });
-    if (requestObject.billing_add) {
-      forEach(requestObject.billing_add, function (val, key) {
-        if (hopArr(['email', 'name', 'phone'], key)) return newCard['owner[' + key + ']'] = val;else if (key === 'address') {
-          forEach(val, function (aVal, aKey) {
-            if (hopArr(['postal_code', 'city', 'country', 'line1', 'line2', 'state'], aKey)) {
-              return newCard['owner[address][' + aKey + ']'] = aVal;
-            }
-          });
-        } else if (key === 'metadata') {
-          forEach(val, function (mVal, mKey) {
-            return newCard['metadata[' + key + ']'] = val;
-          });
-        }
-      });
-    }
+var stripeSource = function () {
+  function stripeSource(httpService, stripeConfig, $q) {
+    _classCallCheck(this, stripeSource);
 
-    /* Send Request */
-    return new $q(function (success, fail) {
-      var create3DSecureCallback = create3DSecure(requestObject, success, fail);
-      return httpService.doRequest({
-        data: newCard,
-        url: '/sources',
-        method: 'POST'
-      }, create3DSecureCallback);
-    });
-    // .then(nomi => {
-    //   console.log('Nomi', nomi);
-    //   return nomi;
-    // })
+    this.$q = $q;
+    this.httpService = httpService;
+    this.stripeConfig = stripeConfig;
+    this.defaults = extend({
+      currency: 'usd',
+      redirect_url: window.location.href,
+      add_card_amount: 100
+    }, stripeConfig.defaults);
   }
 
-  function create3DSecure(requestObject, success, fail) {
-    return function (status, cardResponse) {
-      if (status !== 200 || cardResponse.error) {
-        return fail(cardResponse.error || cardResponse);
-      }
+  _createClass(stripeSource, [{
+    key: 'createCard',
+    value: function createCard(requestObject) {
+      var _this = this;
 
-      if (cardResponse.card.three_d_secure === 'not_supported' && cardResponse.status === 'chargeable') {
-        return success(cardResponse);
-      }
-      if (cardResponse.card.three_d_secure === 'optional' || cardResponse.card.three_d_secure === 'required') {
-        var _3D = extend({}, {
-          amount: stripeConfig.defaults.add_card_amount,
-          currency: stripeConfig.defaults.currency
-        }, {
-          type: 'three_d_secure',
-          three_d_secure: { card: cardResponse.id },
-          redirect: {
-            return_url: requestObject.redirect_url || stripeConfig.default_redirect || window.location.href
+      var newCard = {
+        type: 'card'
+      };
+      forEach(requestObject.card, function (val, key) {
+        if (hopArr[('number', 'cvc', 'exp_month', 'exp_year')], key) {
+          newCard['card[' + key + ']'] = val;
+        }
+      });
+      if (requestObject.billing_add) {
+        forEach(requestObject.billing_add, function (val, key) {
+          if (hopArr(['email', 'name', 'phone'], key)) return newCard['owner[' + key + ']'] = val;else if (key === 'address') {
+            forEach(val, function (aVal, aKey) {
+              if (hopArr(['postal_code', 'city', 'country', 'line1', 'line2', 'state'], aKey)) {
+                return newCard['owner[address][' + aKey + ']'] = aVal;
+              }
+            });
+          } else if (key === 'metadata') {
+            forEach(val, function (mVal, mKey) {
+              return newCard['metadata[' + key + ']'] = val;
+            });
           }
         });
-        var stripe3dsCallback = makeIFrame(requestObject, success, fail);
-        return httpService.doRequest({
-          data: _3D,
+      }
+
+      /* Send Request */
+      return new this.$q(function (success, fail) {
+        var create3DSecureCallback = _this.create3DSecure(requestObject, success, fail);
+        return _this.httpService.doRequest({
+          data: newCard,
           url: '/sources',
           method: 'POST'
-        }, stripe3dsCallback);
-      }
-      return fail(cardResponse);
-    };
+        }, create3DSecureCallback);
+      });
+    }
+  }, {
+    key: 'create3DSecure',
+    value: function create3DSecure(requestObject, success, fail) {
+      var _this2 = this;
 
-    function authSource(requestObject, success, fail) {
+      return function (status, cardResponse) {
+        if (status !== 200 || cardResponse.error) {
+          return fail(cardResponse.error || cardResponse);
+        }
+
+        if (cardResponse.card.three_d_secure === 'not_supported' && cardResponse.status === 'chargeable') {
+          return success(cardResponse);
+        }
+        if (cardResponse.card.three_d_secure === 'optional' || cardResponse.card.three_d_secure === 'required') {
+          var _3D = extend({}, {
+            amount: _this2.defaults.add_card_amount,
+            currency: _this2.defaults.currency
+          }, {
+            type: 'three_d_secure',
+            three_d_secure: { card: cardResponse.id },
+            redirect: {
+              return_url: requestObject.redirect_url || _this2.defaults.redirect_url
+            }
+          });
+          var stripe3dsCallback = _this2.makeIFrame(requestObject, success, fail);
+          return _this2.httpService.doRequest({
+            data: _3D,
+            url: '/sources',
+            method: 'POST'
+          }, stripe3dsCallback);
+        }
+        return fail(cardResponse);
+      };
+    }
+  }, {
+    key: 'authSource',
+    value: function authSource(requestObject, success, fail) {
+      var _this3 = this;
+
       /* Working ON it*/
       return function (status, cardResponse) {
         var charge = {
           id: cardResponse.id,
-          amount: stripeConfig.defaults.add_card_amount
+          amount: _this3.defaults.add_card_amount
         };
-        return httpService.doRequest({
+        return _this3.httpService.doRequest({
           data: charge,
           method: 'POST',
           url: '/charges'
@@ -311,55 +331,69 @@ function stripeSource(httpService, stripeConfig, $q) {
       // .then(R => success(R.data))
       // .catch(ERR => fail(ERR.error));
     }
+  }, {
+    key: 'makeIFrame',
+    value: function makeIFrame(requestObject, success, fail) {
+      var _this4 = this;
 
-    function makeIFrame(requestObject, success, fail) {
       return function (status, stripe3dsResponse) {
         if (status !== 200 || stripe3dsResponse.error) {
           return fail(stripe3dsResponse.error || stripe3dsResponse);
         }
         var tElm = requestObject.targetElement;
         if (!tElm) {
-          tElm = angular.element('<div></div>')[0];
-          angular.element('body').append(tElm);
+          tElm = angular.element('<div>')[0];
+          var v = angular.element('body')[0].append(tElm);
         }
-        console.log('tElm ->', tElm);
-        tElm.innerHTML = '<iframe style="width:100%; height: 800px;" frameborder="0" src="' + stripe3dsResponse.redirect.url + '"></iframe>';
+        tElm.innerHTML = '<iframe style="width:100%; height: 300px;" frameborder="0" src="' + stripe3dsResponse.redirect.url + '"></iframe>';
         requestObject.nativeElement = tElm;
-        var poolingCallback = poolCallback(requestObject, success, fail);
-        function watchSource() {
-          return httpService.doRequest({
-            url: '/sources/' + stripe3dsResponse.id + '?key=' + stripeConfig.key + '&client_secret=' + stripe3dsResponse.client_secret
-          }).then(function (R) {
-            var source = R.data;
-            if (source.status === 'pending') return true;
-            return poolingCallback(R.status, source);
-          })
-          // .delay(1000)
-          .then(function (result) {
-            if (result === true) return watchSource();
-            return result;
-          }).catch(fail);
-        }
-        return watchSource();
+        var poolingCallback = _this4.poolCallback(requestObject, success, fail);
+        return _this4.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret, poolingCallback);
       };
-
-      function poolCallback(requestObject, success, fail) {
-        return function (status, source) {
-          if (status !== 200 || source.error) {
-            return fail(source.error);
-          } else if (source.status === 'canceled' || source.status === 'consumed' || source.status === 'failed') {
-            requestObject.nativeElement.innerHTML = "";
-            fail(source.status);
-          } else if ( /* source.three_d_secure.authenticated && */source.status === 'chargeable') {
-            /* some cards do not need to be authenticated, like the 4242 4242 4242 4242 */
-            requestObject.nativeElement.innerHTML = "";
-            success(source);
-          }
-        };
-      }
     }
-  }
-}
+  }, {
+    key: 'watchSource',
+    value: function watchSource(id, client_secret, onFinish) {
+      var _this5 = this;
+
+      return this.httpService.doRequest({
+        url: '/sources/' + id + '?key=' + this.stripeConfig.key + '&client_secret=' + client_secret
+      }).then(function (R) {
+        var source = R.data;
+        if (source.status === 'pending') return false;
+        return onFinish(R.status, source);
+      }).then(function (source) {
+        if (source === false) return _this5.watchSource(id, client_secret, onFinish);
+        return source;
+      }).catch(function (error) {
+        return onFinish(400, { error: error });
+      });
+    }
+  }, {
+    key: 'poolCallback',
+    value: function poolCallback(requestObject, success, fail) {
+      return function (status, source) {
+        if (status !== 200 || source.error) {
+          return fail(source.error);
+        } else if (source.status === 'canceled' || source.status === 'consumed' || source.status === 'failed') {
+          requestObject.nativeElement.innerHTML = "";
+          fail(source.status);
+        } else if ( /* source.three_d_secure.authenticated && */source.status === 'chargeable') {
+          /* some cards do not need to be authenticated, like the 4242 4242 4242 4242 */
+          requestObject.nativeElement.innerHTML = "";
+          success(source);
+        }
+      };
+    }
+
+    /* End of class */
+
+  }]);
+
+  return stripeSource;
+}();
+
+stripeSource.$inject = ['httpService', 'stripeConfig', '$q'];
 
 exports.default = stripeSource;
 

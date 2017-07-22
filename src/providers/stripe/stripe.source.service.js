@@ -4,17 +4,23 @@
 * Deal with stripe sources
 * @see [description]
 */
-stripeSource.$injector = ['httpService', 'stripeConfig', '$q'];
 
-function stripeSource(httpService, stripeConfig, $q) {
-  const extend = angular.extend;
-  const forEach = angular.forEach;
-  const hopArr = (arr, key) => arr.indexOf(key) > -1;
-  return {
-    createCard
+const extend = angular.extend;
+const forEach = angular.forEach;
+const hopArr = (arr, key) => arr.indexOf(key) > -1;
+
+class stripeSource {
+  constructor(httpService, stripeConfig, $q) {
+    this.$q = $q;
+    this.httpService = httpService;
+    this.stripeConfig = stripeConfig;
+    this.defaults = extend({
+      currency: 'usd',
+      redirect_url: window.location.href,
+      add_card_amount: 100,
+    }, stripeConfig.defaults)
   }
-
-  function createCard(requestObject) {
+  createCard(requestObject) {
     const newCard = {
       type: 'card'
     };
@@ -40,21 +46,17 @@ function stripeSource(httpService, stripeConfig, $q) {
     }
 
     /* Send Request */
-    return new $q((success, fail) => {
-      const create3DSecureCallback = create3DSecure(requestObject, success, fail)
-      return httpService.doRequest({
+    return new this.$q((success, fail) => {
+      const create3DSecureCallback = this.create3DSecure(requestObject, success, fail)
+      return this.httpService.doRequest({
         data: newCard,
         url: '/sources',
         method: 'POST'
       }, create3DSecureCallback)
     })
-    // .then(nomi => {
-    //   console.log('Nomi', nomi);
-    //   return nomi;
-    // })
   }
 
-  function create3DSecure(requestObject, success, fail) {
+  create3DSecure(requestObject, success, fail) {
     return (status, cardResponse) => {
       if (status !== 200 || cardResponse.error) {
         return fail(cardResponse.error || cardResponse)
@@ -65,17 +67,17 @@ function stripeSource(httpService, stripeConfig, $q) {
       }
       if (cardResponse.card.three_d_secure === 'optional' || cardResponse.card.three_d_secure === 'required') {
         const _3D = extend({}, {
-          amount:   stripeConfig.defaults.add_card_amount,
-          currency: stripeConfig.defaults.currency
+          amount:   this.defaults.add_card_amount,
+          currency: this.defaults.currency
         }, {
           type: 'three_d_secure',
           three_d_secure: { card: cardResponse.id },
           redirect: {
-            return_url: ( requestObject.redirect_url || stripeConfig.default_redirect || window.location.href )
+            return_url: ( requestObject.redirect_url || this.defaults.redirect_url )
           }
         });
-        const stripe3dsCallback = makeIFrame(requestObject, success, fail);
-        return httpService.doRequest({
+        const stripe3dsCallback = this.makeIFrame(requestObject, success, fail);
+        return this.httpService.doRequest({
           data: _3D,
           url: '/sources',
           method: 'POST'
@@ -83,78 +85,80 @@ function stripeSource(httpService, stripeConfig, $q) {
       }
       return fail(cardResponse);
     }
+  }
 
-    function authSource(requestObject, success, fail) {
-      /* Working ON it*/
-      return (status, cardResponse) => {
-        const charge = {
-          id: cardResponse.id,
-          amount: stripeConfig.defaults.add_card_amount
-        };
-        return httpService.doRequest({
-          data: charge,
-          method: 'POST',
-          url: '/charges'
-        })
-        .then(r => success(r.data))        
-        .catch(r => fail(r.error))
-      }
-      // .then(R => success(R.data))
-      // .catch(ERR => fail(ERR.error));
+  authSource(requestObject, success, fail) {
+    /* Working ON it*/
+    return (status, cardResponse) => {
+      const charge = {
+        id: cardResponse.id,
+        amount: this.defaults.add_card_amount
+      };
+      return this.httpService.doRequest({
+        data: charge,
+        method: 'POST',
+        url: '/charges'
+      })
+      .then(r => success(r.data))
+      .catch(r => fail(r.error))
     }
+    // .then(R => success(R.data))
+    // .catch(ERR => fail(ERR.error));
+  }
 
-    function makeIFrame(requestObject, success, fail) {
-      return (status, stripe3dsResponse) => {
-        if (status !== 200 || stripe3dsResponse.error) {
-          return fail(stripe3dsResponse.error || stripe3dsResponse)
-        }
-        var tElm = requestObject.targetElement;
-        if (!tElm) {
-          tElm = angular.element('<div></div>')[0]
-          angular.element('body').append(tElm)
-        }
-        console.log('tElm ->', tElm);
-        tElm.innerHTML = `<iframe style="width:100%; height: 800px;" frameborder="0" src="${stripe3dsResponse.redirect.url}"></iframe>`;
-        requestObject.nativeElement = tElm;
-        const poolingCallback = poolCallback(requestObject, success, fail);
-        function watchSource () {
-          return httpService.doRequest({
-            url: `/sources/${stripe3dsResponse.id}?key=${stripeConfig.key}&client_secret=${stripe3dsResponse.client_secret}`
-          })
-          .then(R => {
-            const source = R.data;
-            if (source.status === 'pending') return true;
-            return poolingCallback(R.status, source)
-          })
-          // .delay(1000)
-          .then(result => {
-            if (result === true) return watchSource();
-            return result;
-          })
-          .catch(fail);
-
-        }
-        return watchSource();
+  makeIFrame(requestObject, success, fail) {
+    return (status, stripe3dsResponse) => {
+      if (status !== 200 || stripe3dsResponse.error) {
+        return fail(stripe3dsResponse.error || stripe3dsResponse)
       }
-      
-      function poolCallback(requestObject, success, fail) {
-        return (status, source) => {
-          if (status !== 200 || source.error) {
-            return fail(source.error)
-          }
-          else if (source.status === 'canceled' || source.status === 'consumed' || source.status === 'failed') {
-            requestObject.nativeElement.innerHTML = "";
-            fail(source.status);
-          }
-          else if (/* source.three_d_secure.authenticated && */ source.status === 'chargeable') {
-            /* some cards do not need to be authenticated, like the 4242 4242 4242 4242 */
-            requestObject.nativeElement.innerHTML = "";
-            success(source)
-          }
-        }
+      var tElm = requestObject.targetElement;
+      if (!tElm) {
+        tElm = angular.element('<div>')[0]
+        var v = angular.element('body')[0].append(tElm)
+      }
+      tElm.innerHTML = `<iframe style="width:100%; height: 300px;" frameborder="0" src="${stripe3dsResponse.redirect.url}"></iframe>`;
+      requestObject.nativeElement = tElm;
+      const poolingCallback = this.poolCallback(requestObject, success, fail);
+      return this.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret, poolingCallback);
+    }
+  }
+
+  watchSource (id, client_secret, onFinish) {
+    return this.httpService.doRequest({
+      url: `/sources/${id}?key=${this.stripeConfig.key}&client_secret=${client_secret}`
+    })
+    .then(R => {
+      const source = R.data;
+      if (source.status === 'pending') return false;
+      return onFinish(R.status, source)
+    })
+    .then(source => {
+      if (source === false) return this.watchSource(id, client_secret, onFinish);
+      return source;
+    })
+    .catch(error => onFinish(400, { error }));
+  }
+
+  poolCallback(requestObject, success, fail) {
+    return (status, source) => {
+      if (status !== 200 || source.error) {
+        return fail(source.error)
+      }
+      else if (source.status === 'canceled' || source.status === 'consumed' || source.status === 'failed') {
+        requestObject.nativeElement.innerHTML = "";
+        fail(source.status);
+      }
+      else if (/* source.three_d_secure.authenticated && */ source.status === 'chargeable') {
+        /* some cards do not need to be authenticated, like the 4242 4242 4242 4242 */
+        requestObject.nativeElement.innerHTML = "";
+        success(source)
       }
     }
   }
+
+  /* End of class */
 }
+
+stripeSource.$inject = ['httpService', 'stripeConfig', '$q'];
 
 export default stripeSource;

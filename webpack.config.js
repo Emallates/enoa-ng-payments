@@ -1,14 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
+const payments = './src/payments.js';
+const stripe = './src/providers/stripe/stripe.module.js';
+const paypal = './src/providers/paypal/paypal.module.js';
 // const glob = require('glob');
 // const entries = glob.sync('./src/**/*.*');
 
 module.exports = {
   entry: {
-    "payments": './src/payments.js',
-    "payments.min": './src/payments.js',
-    "stripe": "./src/providers/stripe/stripe.module.js",
-    "stripe.min": "./src/providers/stripe/stripe.module.js"
+    stripe,
+    paypal,
+    payments,
+    "stripe.min": stripe,
+    "paypal.min": paypal,
+    "payments.min": payments
   },
   devtool: "source-map",
   output: {
