@@ -6,4 +6,4 @@
 import stripe from "./providers/stripe/stripe.module";
 import paypal from "./providers/paypal/paypal.module";
 
-module.exports = angular.module('ng-payments', ['stripe']);
+module.exports = angular.module('ng-payments', ['stripe', 'paypal']);
