@@ -175,6 +175,7 @@ var httpService = function () {
       var configs = this.stripeConfig;
       if (options.data) options.data.key = configs.key;
 
+      options.auth = false;
       options.url = options.url.indexOf(configs.base_url) === -1 ? '' + configs.base_url + options.url : options.url;
       options.data = this.$httpParamSerializerJQLike(options.data);
       options.headers = angular.extend({ 'Content-Type': 'application/x-www-form-urlencoded' }, options.headers, { auth: false });
@@ -350,22 +351,22 @@ var stripeSource = function () {
         tElm.innerHTML = '<iframe style="width:100%; height: 800px;" frameborder="0" src="' + stripe3dsResponse.redirect.url + '"></iframe>';
         requestObject.nativeElement = tElm;
         var poolingCallback = _this4.poolCallback(requestObject, success, fail);
-        return _this4.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret);
+        return _this4.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret, fail);
       };
     }
   }, {
     key: 'watchSource',
-    value: function watchSource(id, client_secret) {
+    value: function watchSource(id, client_secret, fail) {
       var _this5 = this;
 
       return this.httpService.doRequest({
         url: '/sources/' + id + '?key=' + this.stripeConfig.key + '&client_secret=' + client_secret
       }).then(function (R) {
         var source = R.data;
-        if (source.status === 'pending') return true;
+        if (source.status === 'pending') return false;
         return poolingCallback(R.status, source);
       }).then(function (result) {
-        if (result === true) return _this5.watchSource();
+        if (result === false) return _this5.watchSource(id, client_secret, fail);
         return result;
       }).catch(fail);
     }
@@ -409,8 +410,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _directives = __webpack_require__(5);
-
-console.log('->addCard', _directives.addCard);
 
 exports.default = angular.module('stripe.directives', []).directive('createSourceToStripe', _directives.addCard.Factory);
 

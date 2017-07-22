@@ -119,21 +119,21 @@ class stripeSource {
       tElm.innerHTML = `<iframe style="width:100%; height: 800px;" frameborder="0" src="${stripe3dsResponse.redirect.url}"></iframe>`;
       requestObject.nativeElement = tElm;
       const poolingCallback = this.poolCallback(requestObject, success, fail);
-      return this.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret);
+      return this.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret, fail);
     }
   }
 
-  watchSource (id, client_secret) {
+  watchSource (id, client_secret, fail) {
     return this.httpService.doRequest({
       url: `/sources/${id}?key=${this.stripeConfig.key}&client_secret=${client_secret}`
     })
     .then(R => {
       const source = R.data;
-      if (source.status === 'pending') return true;
+      if (source.status === 'pending') return false;
       return poolingCallback(R.status, source)
     })
     .then(result => {
-      if (result === true) return this.watchSource();
+      if (result === false) return this.watchSource(id, client_secret, fail);
       return result;
     })
     .catch(fail);

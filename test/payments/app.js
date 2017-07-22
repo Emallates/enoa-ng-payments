@@ -9,7 +9,7 @@ angular.module('app', ['ng-payments'])
 }])
 .controller('ctrl', ['$scope', 'stripeSource', function($scope, stripeSource){
 
-  // console.log('stripeSource ->', stripeSource.authSource);
+  console.log(stripeSource);
   
   $scope.pMethod = {
     card: {
