@@ -283,7 +283,7 @@ var stripeSource = function () {
         if (status !== 200 || cardResponse.error) {
           return fail(cardResponse.error || cardResponse);
         }
-
+        requestObject.cardResponse = cardResponse;
         if (cardResponse.card.three_d_secure === 'not_supported' && cardResponse.status === 'chargeable') {
           return success(cardResponse);
         }
@@ -382,7 +382,7 @@ var stripeSource = function () {
         } else if ( /* source.three_d_secure.authenticated && */source.status === 'chargeable') {
           /* some cards do not need to be authenticated, like the 4242 4242 4242 4242 */
           requestObject.nativeElement.innerHTML = "";
-          success(source);
+          success(extend(requestObject.cardResponse, source));
         }
       };
     }
