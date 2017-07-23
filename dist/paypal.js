@@ -74,13 +74,108 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _configsProvider = __webpack_require__(8);
+
+var _configsProvider2 = _interopRequireDefault(_configsProvider);
+
+var _paymentsService = __webpack_require__(9);
+
+var _paymentsService2 = _interopRequireDefault(_paymentsService);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /**
 * paypal Module
 *
 * Paypal service provider
 */
 
-exports.default = angular.module('paypal', [/*'paypal.directives'*/]);
+exports.default = angular.module('paypal', [/*'paypal.directives'*/]).provider('$paypalconfigs', _configsProvider2.default).service('paypalPayments', _paymentsService2.default);
+
+/***/ }),
+
+/***/ 8:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+// configs.provider.js
+// angular.module('$paypal')
+// .provider('$paypalConfigsProvider')
+
+function paypalConfigProvider() {
+  var BASE_URL = '/';
+
+  this.set = function (url) {
+    BASE_URL = url;
+  };
+
+  function paypalConfigs(base_url) {
+    this.base_url = base_url;
+  }
+
+  this.$get = [function paypalConfigsFactory() {
+    return new paypalConfigs(BASE_URL);
+  }];
+}
+
+exports.default = paypalConfigProvider;
+
+/***/ }),
+
+/***/ 9:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var payments = function () {
+  function payments($http, paypalConfig) {
+    _classCallCheck(this, payments);
+
+    this.$http = $http;
+    this.configs = paypalConfig;
+  }
+
+  _createClass(payments, [{
+    key: 'pay',
+    value: function pay(amount, currency, description) {
+      return this.$http({
+        method: 'POST',
+        data: { amount: amount, description: description },
+        url: this.configs.base_url + '/pay'
+      });
+    }
+  }, {
+    key: 'final',
+    value: function final(paymentId, token, PayerID) {
+      return this.$http({
+        method: 'POST',
+        data: { paymentId: paymentId, token: token, PayerID: PayerID },
+        url: this.configs.base_url + '/pay'
+      });
+    }
+  }]);
+
+  return payments;
+}();
+
+payments.$inject = ['$http', '$paypalconfigs'];
+
+exports.default = payments;
 
 /***/ })
 

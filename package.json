@@ -3,6 +3,19 @@
   "version": "0.0.3",
   "description": "",
   "main": "./dist/payments.js",
+  "author": [
+    "Nauman Ramzan (nomi_ramzan@yahoo.com)",
+    "Ahsan Mustafa (ahsan.emallates@gamil.com)"
+  ],
+  "scripts": {
+    "build": "webpack",
+    "build:w": "nodemon --watch src --exec \"cls & npm run build\"",
+    "test": "node ./test/server.js",
+    "test:w": "nodemon --exec \"cls & node ./test/server.js\"",
+    "pretest": "npm run build",
+    "server": "webpack-dev-server --history-api-fallback --inline --progress",
+    "start": "cls & npm run server"
+  },
   "directories": {
     "test": "test"
   },
@@ -21,6 +34,7 @@
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
+    "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "bower-webpack-plugin": "^0.1.9",
     "express": "^4.15.3",
@@ -29,15 +43,5 @@
     "webpack": "^3.3.0",
     "webpack-dev-server": "^2.5.1"
   },
-  "scripts": {
-    "build": "webpack",
-    "build:w": "nodemon --watch src --exec \"cls & npm run build\"",
-    "test": "node ./test/server.js",
-    "test:w": "nodemon ./test/server.js",
-    "pretest": "npm run build",
-    "server": "webpack-dev-server --history-api-fallback --inline --progress",
-    "start": "cls & npm run server"
-  },
-  "author": "Nauman Ramzan (nomi_ramzan@yahoo.com)",
   "license": "MIT"
 }
