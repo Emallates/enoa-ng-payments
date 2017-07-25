@@ -12,14 +12,36 @@ const _ = require('lodash')
 // })
 Paypal.configure({ mode, client_id, client_secret } = paypal)
 
+
+
 const Payment = {
   intent: "sale",
   payer: { "payment_method": "paypal" },
   redirect_urls: {
     cancel_url: `${cancel_url}/fail`,
     return_url: `${redirect_url}/success`
-  }
+  },
+  transactions: [{
+    amount: {
+      total: "100",
+      currency: 'USD',
+    },
+    description: 'PAyment details ',
+  }]
 }
+
+const nTrans = {
+  "payer_id": "J87SQ4NZAKKQ6",
+  "transactions": Payment.transactions
+}
+Paypal.payment.create(Payment, function (err, trans) {
+  if (err) throw err;
+  console.log(trans)
+  Paypal.payment.execute(trans.id || 'PAY-8RP13984FG9804533LF26E3A', nTrans, function (err, trans2) {
+    console.log(err || trans2);
+  });
+})
+
 
 module.exports = {
   Paypal,
