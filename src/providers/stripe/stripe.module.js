@@ -11,6 +11,6 @@ import stripeDirectives from "./stripe.directives.js";
 
 export default angular.module('stripe', ['stripe.directives'])
   .provider('stripeConfig', stripeProvider)
-  .service('httpService', httpService)
+  .service('stripe.http', httpService)
   .service('stripeSource', stripeSource)
   ;
