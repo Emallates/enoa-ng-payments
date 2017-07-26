@@ -160,6 +160,6 @@ class stripeSource {
   /* End of class */
 }
 
-stripeSource.$inject = ['httpService', 'stripeConfig', '$q'];
+stripeSource.$inject = ['stripe.http', 'stripeConfig', '$q'];
 
 export default stripeSource;

@@ -97,7 +97,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 *
 * Stripe service provider
 */
-exports.default = angular.module('stripe', ['stripe.directives']).provider('stripeConfig', _stripeProvider2.default).service('httpService', _stripeHttpService2.default).service('stripeSource', _stripeSourceService2.default);
+exports.default = angular.module('stripe', ['stripe.directives']).provider('stripeConfig', _stripeProvider2.default).service('stripe.http', _stripeHttpService2.default).service('stripeSource', _stripeSourceService2.default);
 
 /***/ }),
 /* 1 */
@@ -394,7 +394,7 @@ var stripeSource = function () {
   return stripeSource;
 }();
 
-stripeSource.$inject = ['httpService', 'stripeConfig', '$q'];
+stripeSource.$inject = ['stripe.http', 'stripeConfig', '$q'];
 
 exports.default = stripeSource;
 
