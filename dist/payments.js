@@ -347,7 +347,7 @@ var stripeSource = function () {
           angular.element('body').append(tElm);
         }
         tElm.src = stripe3dsResponse.redirect.url;
-        requestObject.nativeElement = tElm;
+        if (requestObject.onChange) requestObject.onChange('processing', requestObject);
         var poolingCallback = _this4.poolCallback(requestObject, success, fail);
         return _this4.watchSource(stripe3dsResponse.id, stripe3dsResponse.client_secret, poolingCallback);
       };
@@ -375,13 +375,14 @@ var stripeSource = function () {
     value: function poolCallback(requestObject, success, fail) {
       return function (status, source) {
         if (status !== 200 || source.error) {
+          if (requestObject.onChange) requestObject.onChange('failed', requestObject);
           return fail(source.error);
         } else if (source.status === 'canceled' || source.status === 'consumed' || source.status === 'failed') {
-          requestObject.nativeElement.innerHTML = "";
-          fail(source.status);
+          if (requestObject.onChange) requestObject.onChange('failed', requestObject);
+          return fail(source.status);
         } else if ( /* source.three_d_secure.authenticated && */source.status === 'chargeable') {
           /* some cards do not need to be authenticated, like the 4242 4242 4242 4242 */
-          requestObject.nativeElement.innerHTML = "";
+          if (requestObject.onChange) requestObject.onChange('success', requestObject);
           success(extend(requestObject.cardResponse, source));
         }
       };
