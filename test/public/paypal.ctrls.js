@@ -14,8 +14,8 @@ angular.module('app')
   $scope.pay = function () {
     paypalPayments.pay(
       $scope.payment.amount,
-      $scope.user.currency,
-      `Plan title ${Math.random()}`
+      //$scope.user.currency,
+      //`Plan title ${Math.random()}` // Snoopyo.com payment 
     ).then(R => {
       // $window.open(R.data.link);
       $window.location.href = R.data.link;
